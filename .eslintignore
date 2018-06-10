@@ -1,0 +1,10 @@
+node_modules
+ess-mock
+ess-stub
+functional-test
+contract-runner
+config
+coverage*/
+performance-test
+set-postman-env-values.js
+smoke-test/lassie.js
