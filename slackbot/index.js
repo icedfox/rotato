@@ -79,4 +79,4 @@ class SlackBot {
   }
 }
 
-module.exports = new SlackBot();
+module.exports = SlackBot;
