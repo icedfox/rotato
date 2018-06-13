@@ -10,7 +10,7 @@ class EventListener {
   createListener() {
     // Rotato got invited to a new channel
     this.rtm.on('message', (event) => {
-      console.log('event', event);
+      console.log('message', event);
       // For structure of `event`, see https://api.slack.com/events/message/channel_name
       // console.log(`A channel was renamed from ${message.old_name} to ${message.name}`);
     });

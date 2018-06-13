@@ -1,6 +1,7 @@
 const { google } = require('googleapis');
 const Client = require('../client.js');
 const autoBind = require('auto-bind');
+const pino = require('pino')();
 
 const SHEET_ID = process.env.SHEETS_ID;
 
@@ -45,6 +46,26 @@ class Sheets {
     }, (err, result) => {
       if (err) { return console.log(`The API returned an error: ${err}`); }
       console.log('%d cells updated.', result.updatedCells);
+    });
+  }
+
+  getSpreadsheetDetails() {
+    pino.info('Getting spreadsheet metadata');
+    const request = {
+      spreadsheetId: SHEET_ID,
+      ranges: [],
+      includeGridData: false,
+      auth: Client.getClient()
+    };
+    const sheets = google.sheets('v4');
+    return new Promise((resolve, reject) => {
+      sheets.spreadsheets.get(request, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
     });
   }
 
