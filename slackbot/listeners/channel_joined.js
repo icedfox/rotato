@@ -24,15 +24,18 @@ class EventListener {
               pino.info('got spreadSheetDetails');
               if (hasASheet) {
                 pino.error('Already has a sheet');
-              } else {
-                Sheets.addNewSheet(event.channel);
+                return Promise.reject(new Error('Already has a sheet'));
               }
+              return Sheets.addNewSheet(event.channel);
+            })
+            .then((res) => {
+              pino.info('Created new sheet:', res);
             })
             .catch((err) => {
-              pino.error(err);
+              pino.error('Failed to create a new sheet', err);
             });
         } else {
-          pino.error('already in channel');
+          pino.error('Sheet already exists for this channel');
         }
       }
     });

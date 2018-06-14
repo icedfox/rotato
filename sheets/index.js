@@ -71,7 +71,7 @@ class Sheets {
   }
 
   addNewSheet(channel) {
-    console.log('here', channel);
+    pino.info('Attempting to create a sheet');
     const request = {
       spreadsheetId: SHEET_ID,
       resource: {
@@ -87,12 +87,13 @@ class Sheets {
       }
     };
     const sheets = google.sheets({ version: VERSION, auth: Client.getClient() });
-    sheets.spreadsheets.batchUpdate(request, (err, res) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(res);
+    return new Promise((resolve, reject) => {
+      sheets.spreadsheets.batchUpdate(request, (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(res);
+      });
     });
   }
 
