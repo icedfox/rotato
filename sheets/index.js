@@ -4,6 +4,7 @@ const autoBind = require('auto-bind');
 const pino = require('pino')();
 
 const SHEET_ID = process.env.SHEETS_ID;
+const VERSION = 'v4';
 
 class Sheets {
   constructor() {
@@ -13,7 +14,7 @@ class Sheets {
   }
 
   listUsers() {
-    const sheets = google.sheets({ version: 'v4', auth: this.client });
+    const sheets = google.sheets({ version: VERSION, auth: this.client });
     sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range: 'Moose!A2:B'
@@ -33,7 +34,7 @@ class Sheets {
   }
 
   addUser() {
-    const sheets = google.sheets({ version: 'v4', auth: this.client });
+    const sheets = google.sheets({ version: VERSION, auth: this.client });
     sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
       range: 'Moose!A4:B',
@@ -57,7 +58,7 @@ class Sheets {
       includeGridData: false,
       auth: Client.getClient()
     };
-    const sheets = google.sheets('v4');
+    const sheets = google.sheets(VERSION);
     return new Promise((resolve, reject) => {
       sheets.spreadsheets.get(request, (err, res) => {
         if (err) {
@@ -78,20 +79,45 @@ class Sheets {
           {
             addSheet: {
               properties: {
-                title: `${channel.id}_${channel.name}`
+                title: channel.id
               }
             }
           }
         ]
       }
     };
-    const sheets = google.sheets({ version: 'v4', auth: Client.getClient() });
+    const sheets = google.sheets({ version: VERSION, auth: Client.getClient() });
     sheets.spreadsheets.batchUpdate(request, (err, res) => {
       if (err) {
         console.error(err);
         return;
       }
       console.log(res);
+    });
+  }
+
+  deleteSheet(sheetId) {
+    pino.info('Attempting to delete a sheet');
+    const request = {
+      spreadsheetId: SHEET_ID,
+      resource: {
+        requests: [
+          {
+            deleteSheet: {
+              sheetId
+            }
+          }
+        ]
+      }
+    };
+    const sheets = google.sheets({ version: VERSION, auth: Client.getClient() });
+    return new Promise((resolve, reject) => {
+      sheets.spreadsheets.batchUpdate(request, (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(res);
+      });
     });
   }
 }

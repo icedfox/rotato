@@ -19,7 +19,7 @@ class EventListener {
           Sheets.getSpreadsheetDetails()
             .then((response) => {
               const hasASheet = response.data.sheets.find((sheet) => {
-                return sheet.properties.title === `${event.channel.id} ${event.channel.name}`;
+                return sheet.properties.title === event.channel.id;
               });
               pino.info('got spreadSheetDetails');
               if (hasASheet) {
