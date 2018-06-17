@@ -6,6 +6,7 @@ const { RTMClient, WebClient } = require('@slack/client');
 // const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 
 const token = process.env.SLACK_TBO_TOKEN;
+const botName = 'rotato';
 
 class SlackBot {
   constructor() {
@@ -15,16 +16,31 @@ class SlackBot {
     this.client.rtm = new RTMClient(token);
     this.client.rtm.start();
 
+    // console.log('*** web client', this.client.web);
+
     // This argument can be a channel ID, a DM ID, a MPDM ID, or a group ID
     // const conversationId = 'C4M6C1J4W';
 
     // The RTM client can send simple string messages
     //
     // this.announceToChannel();
-    this.findChannels();
     // this.initListeners();
 
     autoBind(this);
+  }
+
+  initBot() {
+    return this.getRotatoId()
+      .then(() => { return this.findChannels(); });
+  }
+
+  getRotatoId() {
+    return this.client.web.users.list()
+      .then((list) => {
+        this.bot = list.members.find((user) => {
+          return user.is_bot && user.name === botName;
+        });
+      });
   }
 
   initListeners() {
@@ -36,7 +52,7 @@ class SlackBot {
   }
 
   findChannels() {
-    this.client.web.channels.list()
+    return this.client.web.channels.list()
       .then((res) => {
       // Take any channel for which the bot is a member
         const channels = res.channels.filter((c) => {

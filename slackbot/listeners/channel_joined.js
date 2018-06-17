@@ -29,7 +29,7 @@ class EventListener {
               return Sheets.addNewSheet(event.channel);
             })
             .then((res) => {
-              pino.info('Created new sheet:', res);
+              pino.info('Created new sheet');
             })
             .catch((err) => {
               pino.error('Failed to create a new sheet', err);
