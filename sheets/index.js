@@ -6,6 +6,14 @@ const pino = require('pino')();
 const SHEET_ID = process.env.SHEETS_ID;
 const VERSION = 'v4';
 
+const buildRanges = (rowNumber, sheetName) => {
+  const ranges = [];
+  for (let i = 2; i <= rowNumber; i += 1) {
+    ranges.push([`${sheetName}!A${i}:G`]);
+  }
+  return ranges;
+};
+
 class Sheets {
   constructor() {
     // const auth = Client.getClient();
@@ -13,40 +21,62 @@ class Sheets {
     autoBind(this);
   }
 
-  listUsers() {
-    const sheets = google.sheets({ version: VERSION, auth: this.client });
-    sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: 'Moose!A2:B'
-    }, (err, { data }) => {
-      if (err) { return console.log(`The API returned an error: ${err}`); }
-      const rows = data.values;
-      if (rows.length) {
-        console.log('Name, Major:');
-        // Print columns A and E, which correspond to indices 0 and 4.
-        rows.map((row) => {
-          console.log(`${row[0]}, ${row[1]}`);
-        });
-      } else {
-        console.log('No data found.');
-      }
+  listUsers(sheetName) {
+    return new Promise((resolve, reject) => {
+      const sheets = google.sheets({
+        version: VERSION,
+        auth: Client.getClient()
+      });
+      sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: `${sheetName}!A2:G`
+      }, (err, { data }) => {
+        if (err) { reject(err); }
+        resolve(data.values);
+      });
     });
   }
 
-  addUser() {
-    const sheets = google.sheets({ version: VERSION, auth: this.client });
-    sheets.spreadsheets.values.update({
-      spreadsheetId: SHEET_ID,
-      range: 'Moose!A4:B',
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [
-          ['@Kyle', 'Kyle']
-        ]
-      }
-    }, (err, result) => {
-      if (err) { return console.log(`The API returned an error: ${err}`); }
-      console.log('%d cells updated.', result.updatedCells);
+  clearSheetValues(rowNumber, sheetName) {
+    return new Promise((resolve, reject) => {
+      const sheets = google.sheets({
+        version: VERSION,
+        auth: Client.getClient()
+      });
+      sheets.spreadsheets.values.batchClear({
+        spreadsheetId: SHEET_ID,
+        resource: {
+          ranges: buildRanges(rowNumber, sheetName)
+        }
+      }, (err, response) => {
+        if (err) { reject(err); }
+        resolve(response);
+      });
+    });
+  }
+
+  updateSheetValues(facilitators, rowNumber, sheetName) {
+    const header = ['Slack ID', 'Slack name', 'Real name', 'Standup Facilitator', 'Count', 'Retro Facilitator', 'Count'];
+    const sheets = google.sheets({
+      version: VERSION,
+      auth: Client.getClient()
+    });
+    this.clearSheetValues(rowNumber, sheetName)
+    .then(() => {
+      sheets.spreadsheets.values.update({
+        spreadsheetId: SHEET_ID,
+        range: `${sheetName}!A1:G`,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [header].concat(facilitators)
+        }
+      }, (err, result) => {
+        if (err) { return console.log(`The API returned an error: ${err}`); }
+        console.log('%d cells updated.', result.updatedCells);
+      });
+    })
+    .catch((err) => {
+      pino.error(err);
     });
   }
 

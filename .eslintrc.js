@@ -10,6 +10,7 @@ module.exports = {
     'comma-dangle': ['error', 'never'],
     'arrow-parens': ['error', 'always'],
     'curly': ['error', 'all'],
+    'indent': 0,
     'max-len': ['error', 120, 2, {
       ignoreUrls: true,
       ignoreComments: false,
@@ -19,6 +20,7 @@ module.exports = {
     }],
     'arrow-body-style': ['error', 'always'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
-    'no-shadow': ['error', { 'allow': ['error', 'callback'] }]
+    'no-shadow': ['error', { 'allow': ['error', 'callback'] }],
+    'class-methods-use-this': 0
   }
 };

@@ -25,23 +25,23 @@ class EventListener {
         this.channels = this.channels.filter((channel) => { return event.channel !== channel.id; });
         // remove the channel from the spreadsheet
         Sheets.getSpreadsheetDetails()
-          .then((response) => {
-            const sheetDetails = response.data.sheets.find((sheet) => {
-              return sheet.properties.title === event.channel;
-            });
-            pino.info('Got spreadSheetDetails', sheetDetails);
-            if (sheetDetails) {
-              pino.info('sheetDetails', sheetDetails);
-              return Sheets.deleteSheet(sheetDetails.properties.sheetId);
-            }
-            return Promise.reject(new Error('Sheet not found'));
-          })
-          .then(() => {
-            pino.info('Sheet deleted');
-          })
-          .catch((err) => {
-            pino.error('Failed to delete sheet', err);
+        .then((response) => {
+          const sheetDetails = response.data.sheets.find((sheet) => {
+            return sheet.properties.title === event.channel;
           });
+          pino.info('Got spreadSheetDetails', sheetDetails);
+          if (sheetDetails) {
+            pino.info('sheetDetails', sheetDetails);
+            return Sheets.deleteSheet(sheetDetails.properties.sheetId);
+          }
+          return Promise.reject(new Error('Sheet not found'));
+        })
+        .then(() => {
+          pino.info('Sheet deleted');
+        })
+        .catch((err) => {
+          pino.error('Failed to delete sheet', err);
+        });
       }
     });
   }

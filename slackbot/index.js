@@ -37,7 +37,8 @@ class SlackBot {
   getRotatoId() {
     return this.client.web.users.list()
       .then((list) => {
-        this.bot = list.members.find((user) => {
+        this.client.users = list.members;
+        this.client.bot = list.members.find((user) => {
           return user.is_bot && user.name === botName;
         });
       });

@@ -17,23 +17,23 @@ class EventListener {
         const isAlreadyInSlackChannel = this.channels.find((channel) => { return event.channel.id === channel.id; });
         if (!isAlreadyInSlackChannel) {
           Sheets.getSpreadsheetDetails()
-            .then((response) => {
-              const hasASheet = response.data.sheets.find((sheet) => {
-                return sheet.properties.title === event.channel.id;
-              });
-              pino.info('got spreadSheetDetails');
-              if (hasASheet) {
-                pino.error('Already has a sheet');
-                return Promise.reject(new Error('Already has a sheet'));
-              }
-              return Sheets.addNewSheet(event.channel);
-            })
-            .then((res) => {
-              pino.info('Created new sheet');
-            })
-            .catch((err) => {
-              pino.error('Failed to create a new sheet', err);
+          .then((response) => {
+            const hasASheet = response.data.sheets.find((sheet) => {
+              return sheet.properties.title === event.channel.id;
             });
+            pino.info('got spreadSheetDetails');
+            if (hasASheet) {
+              pino.error('Already has a sheet');
+              return Promise.reject(new Error('Already has a sheet'));
+            }
+            return Sheets.addNewSheet(event.channel);
+          })
+          .then((res) => {
+            pino.info('Created new sheet');
+          })
+          .catch((err) => {
+            pino.error('Failed to create a new sheet', err);
+          });
         } else {
           pino.error('Sheet already exists for this channel');
         }
