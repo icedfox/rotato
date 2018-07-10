@@ -8,10 +8,42 @@ const VERSION = 'v4';
 
 const buildRanges = (rowNumber, sheetName) => {
   const ranges = [];
-  for (let i = 2; i <= rowNumber; i += 1) {
+  for (let i = 1; i <= rowNumber; i += 1) {
     ranges.push([`${sheetName}!A${i}:G`]);
   }
   return ranges;
+};
+
+const formatUsers = (users) => {
+  return users.map((user) => {
+    return {
+      id: user[0],
+      alias: user[1],
+      realName: user[2],
+      standup: {
+        participating: user[3],
+        count: user[4]
+      },
+      retro: {
+        participating: user[5],
+        count: user[6]
+      }
+    };
+  });
+};
+
+const rebuildUsers = (users) => {
+  return users.map((user) => {
+    return [
+      user.id,
+      user.alias,
+      user.realName,
+      user.standup.participating,
+      user.standup.count,
+      user.retro.participating,
+      user.retro.count
+    ];
+  });
 };
 
 class Sheets {
@@ -32,7 +64,8 @@ class Sheets {
         range: `${sheetName}!A2:G`
       }, (err, { data }) => {
         if (err) { reject(err); }
-        resolve(data.values);
+        const result = data.values || [];
+        resolve(formatUsers(result));
       });
     });
   }
@@ -68,7 +101,7 @@ class Sheets {
         range: `${sheetName}!A1:G`,
         valueInputOption: 'USER_ENTERED',
         resource: {
-          values: [header].concat(facilitators)
+          values: [header].concat(rebuildUsers(facilitators))
         }
       }, (err, result) => {
         if (err) { return console.log(`The API returned an error: ${err}`); }

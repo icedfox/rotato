@@ -9,7 +9,7 @@ module.exports = (userId, sheetName) => {
        */
       // Check if the user already exists in the list
       const existingUser = rows.find((facilitator) => {
-        return facilitator.includes(userId);
+        return facilitator.id === userId;
       });
       if (!existingUser) {
         // The user doesn't exist
@@ -18,10 +18,9 @@ module.exports = (userId, sheetName) => {
         });
       }
       // remove the user from the list
-      const facilitators = rows.filter((row) => {
-        return row[0] !== userId;
+      const facilitators = rows.filter((facilitator) => {
+        return facilitator.id !== userId;
       });
-      console.log('***', facilitators);
       return Sheets.updateSheetValues(facilitators, rows.length, sheetName);
     });
 };

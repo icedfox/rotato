@@ -1,5 +1,7 @@
 const autoBind = require('auto-bind');
-const pino = require('pino')();
+const pino = require('pino')({
+  prettyPrint: { colorize: true }
+});
 
 // commands
 const help = require('../commands/help.js');
@@ -30,6 +32,7 @@ class EventListener {
   }
 
   add(words, eventChannel) {
+    pino.info('Trying to add a new user');
     if (eventChannel && isValidId(words[2])) {
       const targetUser = this.findUser(words[2]);
       addUser(targetUser, `${eventChannel.id}_${eventChannel.name}`)
@@ -40,8 +43,10 @@ class EventListener {
         return response;
       })
       .catch((err) => {
-        pino.error({});
+        pino.error(err);
       });
+    } else {
+      console.log('wrong command for add');
     }
   }
 
