@@ -1,6 +1,8 @@
 const autoBind = require('auto-bind');
 const Sheets = require('../../sheets');
-const pino = require('pino')();
+const pino = require('pino')({
+  prettyPrint: { colorize: true }
+});
 
 class EventListener {
   constructor({ rtm, channels }) {

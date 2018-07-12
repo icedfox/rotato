@@ -1,7 +1,9 @@
 const { google } = require('googleapis');
 const Client = require('../client.js');
 const autoBind = require('auto-bind');
-const pino = require('pino')();
+const pino = require('pino')({
+  prettyPrint: { colorize: true }
+});
 
 const SHEET_ID = process.env.SHEETS_ID;
 const VERSION = 'v4';
@@ -22,11 +24,11 @@ const formatUsers = (users) => {
       realName: user[2],
       standup: {
         participating: user[3],
-        count: user[4]
+        count: parseInt(user[4], 10)
       },
       retro: {
         participating: user[5],
-        count: user[6]
+        count: parseInt(user[6], 10)
       }
     };
   });
@@ -142,7 +144,7 @@ class Sheets {
           {
             addSheet: {
               properties: {
-                title: channel.id
+                title: `${channel.id}_${channel.name}`
               }
             }
           }

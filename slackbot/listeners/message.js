@@ -32,13 +32,14 @@ class EventListener {
   }
 
   add(words, eventChannel) {
-    pino.info('Trying to add a new user');
+    pino.info(`Trying to add a new user '${words[2]}' to ${eventChannel.id}_${eventChannel.name}`);
     if (eventChannel && isValidId(words[2])) {
       const targetUser = this.findUser(words[2]);
       addUser(targetUser, `${eventChannel.id}_${eventChannel.name}`)
       .then((response) => {
-        if (response.userExists) {
-          return this.rtm.sendMessage(`${response.user[2]} is already a facilitator`, eventChannel.id);
+        console.log(response);
+        if (response && response.userExists) {
+          return this.rtm.sendMessage(`${response.user.realName} is already a facilitator`, eventChannel.id);
         }
         return response;
       })
@@ -83,6 +84,7 @@ class EventListener {
   createListener() {
     // Rotato is listening for messages in all the channels he joined
     this.rtm.on('message', (event) => {
+      console.log('*** event', event);
       if (event.text.includes(this.bot.id)) {
         const eventChannel = this.channels.find((channel) => {
           return channel.id === event.channel;

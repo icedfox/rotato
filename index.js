@@ -1,7 +1,8 @@
-const { google } = require('googleapis');
+// const { google } = require('googleapis');
 const Client = require('./client.js');
-const Sheets = require('./sheets/index.js');
+// const Sheets = require('./sheets/index.js');
 const SlackBot = require('./slackbot/index.js');
+const Cron = require('./cron/index.js');
 const pino = require('pino')({
   prettyPrint: { colorize: true }
 });
@@ -16,6 +17,7 @@ Client.authorize()
   })
   .then(() => {
     pino.info('SlackBot connected!');
+    Cron.startJobs();
   })
   .catch((err) => {
     pino.error(err);
