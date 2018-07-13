@@ -23,11 +23,11 @@ const formatUsers = (users) => {
       alias: user[1],
       realName: user[2],
       standup: {
-        participating: user[3],
+        participating: user[3] === 'yes',
         count: parseInt(user[4], 10)
       },
       retro: {
-        participating: user[5],
+        participating: user[5] === 'yes',
         count: parseInt(user[6], 10)
       }
     };
@@ -40,9 +40,9 @@ const rebuildUsers = (users) => {
       user.id,
       user.alias,
       user.realName,
-      user.standup.participating,
+      user.standup.participating ? 'yes' : 'no',
       user.standup.count,
-      user.retro.participating,
+      user.retro.participating ? 'yes' : 'no',
       user.retro.count
     ];
   });

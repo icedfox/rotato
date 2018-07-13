@@ -6,9 +6,10 @@ const pino = require('pino')({
 });
 
 class StandupJob {
-  constructor() {
+  constructor(bot) {
+    this.bot = bot;
     this.job = new CronJob({
-      cronTime: '00 * 11 * * *',
+      cronTime: '00 * 9 * * *',
       onTick: () => { return this.chooseFacilitator(); },
       start: false
     });
@@ -17,9 +18,11 @@ class StandupJob {
   }
 
   chooseOne(users) {
-    const n = Math.min(...users.map((user) => { return user.standup.count; }));
+    console.log('***', users);
+    const candidates = users.filter((user) => { return user.standup.participating; });
+    const n = Math.min(...candidates.map((user) => { return user.standup.count; }));
     // filter out the users with the lowest count
-    const victims = users.filter((user) => {
+    const victims = candidates.filter((user) => {
       return user.standup.count === n;
     });
     // return the victim
@@ -36,7 +39,10 @@ class StandupJob {
         return sheetData.properties.title;
       });
       sheetsToFetch.forEach((sheet) => {
-        sheets.push({ channel: sheet.split('_')[0] });
+        sheets.push({
+          channel: sheet.split('_')[0],
+          sheetName: sheet
+        });
       });
 
       return Promise.all(sheetsToFetch.map((sheet) => { return Sheets.listUsers(sheet); }));
@@ -46,9 +52,39 @@ class StandupJob {
       for (let i = 0; i < sheets.length; i += 1) {
         sheets[i].facilitator = facilitators[i];
       }
-      console.log('*** what are sheets now?', sheets);
+
       // TODO
-      // increment count and announce to channel
+      // increment count
+      for (let i = 0; i < sheets.length; i += 1) {
+        const facilitator = users[i].find((user) => {
+          return user.id === sheets[i].facilitator.id;
+        });
+        if (facilitator) {
+          facilitator.standup.count += 1;
+        }
+      }
+      // sheets.forEach((sheet) => {
+      //   users.forEach((userList) => {
+      //     const facilitator = userList.find((user) => {
+      //       return user.id === sheet.facilitator.id;
+      //     });
+      //     if (facilitator) {
+      //       facilitator.standup.count += 1;
+      //     }
+      //   });
+      // });
+
+      // update the sheets
+      return Promise.all(users.map((userList, index) => {
+        return Sheets.updateSheetValues(userList, userList.length, sheets[index].sheetName);
+      }));
+    })
+    .then(() => {
+      // announce to channel
+      sheets.forEach((sheet) => {
+        const message = `Good morning! For today's standup, <@${sheet.facilitator.id}> will be facilitating!`;
+        this.bot.announceToChannel(sheet.channel, message);
+      });
     });
   }
 
@@ -58,4 +94,4 @@ class StandupJob {
   }
 }
 
-module.exports = new StandupJob();
+module.exports = StandupJob;

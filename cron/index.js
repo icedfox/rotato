@@ -4,16 +4,17 @@ const pino = require('pino')({
 });
 
 class Cron {
-  constructor() {
+  constructor(bot) {
     this.jobs = ['standup'];
+    this.bot = bot;
 
     autoBind(this);
   }
 
   startJobs() {
     this.jobs.forEach((jobName) => {
-      const job = require(`./jobs/${jobName}.js`); // eslint-disable-line
-      // const job = new Job();
+      const Job = require(`./jobs/${jobName}.js`); // eslint-disable-line
+      const job = new Job(this.bot);
       job.start();
     });
 
@@ -21,4 +22,4 @@ class Cron {
   }
 }
 
-module.exports = new Cron();
+module.exports = Cron;

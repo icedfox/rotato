@@ -40,11 +40,11 @@ module.exports = (user, sheetName) => {
       alias: name,
       realName,
       standup: {
-        participating: 'yes',
+        participating: true,
         count: minStandupCount
       },
       retro: {
-        participating: 'yes',
+        participating: false,
         count: minRetroCount
       }
     });

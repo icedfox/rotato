@@ -7,18 +7,20 @@ const pino = require('pino')({
   prettyPrint: { colorize: true }
 });
 
+const bot = new SlackBot();
+
 Client.authorize()
-  .then(() => {
-    pino.info('Google Sheets API connected!');
-    // addUser();
-    // Sheets.addNewSheet('ChannelId');
-    const bot = new SlackBot();
-    return bot.initBot();
-  })
-  .then(() => {
-    pino.info('SlackBot connected!');
-    Cron.startJobs();
-  })
-  .catch((err) => {
-    pino.error(err);
-  });
+.then(() => {
+  pino.info('Google Sheets API connected!');
+  // addUser();
+  // Sheets.addNewSheet('ChannelId');
+  return bot.initBot();
+})
+.then(() => {
+  pino.info('SlackBot connected!');
+  const cron = new Cron(bot.getBotInstance());
+  cron.startJobs();
+})
+.catch((err) => {
+  pino.error(err);
+});
