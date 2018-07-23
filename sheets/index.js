@@ -5,6 +5,8 @@ const pino = require('pino')({
   prettyPrint: { colorize: true }
 });
 
+const utils = require('./utils/index.js');
+
 const SHEET_ID = process.env.SHEETS_ID;
 const VERSION = 'v4';
 
@@ -16,38 +18,6 @@ const buildRanges = (rowNumber, sheetName) => {
   return ranges;
 };
 
-const formatUsers = (users) => {
-  return users.map((user) => {
-    return {
-      id: user[0],
-      alias: user[1],
-      realName: user[2],
-      standup: {
-        participating: user[3] === 'yes',
-        count: parseInt(user[4], 10)
-      },
-      retro: {
-        participating: user[5] === 'yes',
-        count: parseInt(user[6], 10)
-      }
-    };
-  });
-};
-
-const rebuildUsers = (users) => {
-  return users.map((user) => {
-    return [
-      user.id,
-      user.alias,
-      user.realName,
-      user.standup.participating ? 'yes' : 'no',
-      user.standup.count,
-      user.retro.participating ? 'yes' : 'no',
-      user.retro.count
-    ];
-  });
-};
-
 class Sheets {
   constructor() {
     // const auth = Client.getClient();
@@ -56,6 +26,7 @@ class Sheets {
   }
 
   listUsers(sheetName) {
+    pino.info(`Fetching users for sheet ${sheetName}`);
     return new Promise((resolve, reject) => {
       const sheets = google.sheets({
         version: VERSION,
@@ -67,7 +38,25 @@ class Sheets {
       }, (err, { data }) => {
         if (err) { reject(err); }
         const result = data.values || [];
-        resolve(formatUsers(result));
+        resolve(utils.users.format(result));
+      });
+    });
+  }
+
+  listHolidays() {
+    return new Promise((resolve, reject) => {
+      const sheets = google.sheets({
+        version: VERSION,
+        auth: Client.getClient()
+      });
+
+      sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: 'holidays!A2:B'
+      }, (err, { data }) => {
+        if (err) { reject(err); }
+        const result = data.values || [];
+        resolve(utils.holidays.format(result));
       });
     });
   }
@@ -103,7 +92,7 @@ class Sheets {
         range: `${sheetName}!A1:G`,
         valueInputOption: 'USER_ENTERED',
         resource: {
-          values: [header].concat(rebuildUsers(facilitators))
+          values: [header].concat(utils.users.rebuild(facilitators))
         }
       }, (err, result) => {
         if (err) { return console.log(`The API returned an error: ${err}`); }
